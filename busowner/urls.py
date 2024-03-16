@@ -8,6 +8,7 @@ from rest_framework.routers import DefaultRouter
 router=DefaultRouter()
 router.register("bus",views.BusView,basename="bus-add")  
 router.register("route",views.RouteView,basename="route") 
+router.register("category",views.CategoriesView,basename="category")
 router.register("routeassign",views.BusRouteView,basename="routeassign")
 router.register("stops",views.BusRouteStopView,basename="stops")
 

@@ -54,9 +54,7 @@ class CategoriesView(ViewSet):
     permission_classes=[permissions.IsAuthenticated,IsBusOwnerApproved]
             
     def list(self,request,*args,**kwargs):
-        busowner_id=request.user.id
-        busowner_obj=BusOwner.objects.get(id=busowner_id)
-        qs=Bus.objects.filter(busowner=busowner_obj)
+        qs=BusCategory.objects.all()
         serializer=BusSerializer(qs,many=True)
         return Response(serializer.data)
 
