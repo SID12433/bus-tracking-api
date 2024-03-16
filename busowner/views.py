@@ -55,7 +55,7 @@ class CategoriesView(ViewSet):
             
     def list(self,request,*args,**kwargs):
         qs=BusCategory.objects.all()
-        serializer=BusSerializer(qs,many=True)
+        serializer=BusCategorySerializer(qs,many=True)
         return Response(serializer.data)
 
         
