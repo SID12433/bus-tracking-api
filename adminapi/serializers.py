@@ -51,7 +51,6 @@ class PassengerviewSerializer(serializers.ModelSerializer):
 
 class BusSerializer(serializers.ModelSerializer):
     id=serializers.CharField(read_only=True)
-    buscategory=CategorySerializer()
     busowner=BusownerviewSerializer()
     class Meta:
         model = Bus
