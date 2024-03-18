@@ -259,5 +259,15 @@ class BusRouteStopView(ViewSet):
             return Response(serializer.data)
         else:
            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+       
+    
+        
+    @action(methods=["get"], detail=True)
+    def stopdetail(self, request, *args, **kwargs):
+        id=kwargs.get("pk")
+        qs=BusStopDetail.objects.get(id=id)
+        serializer=BusStopDetailSerializer(qs)
+        return Response(serializer.data)
+
     
     
