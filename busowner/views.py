@@ -148,24 +148,60 @@ class BusRouteView(ViewSet):
         return Response(serializer.data)
     
     
+    # def retrieve(self, request, *args, **kwargs):
+    #     id = kwargs.get("pk")
+    #     busroute_obj = BusRoute.objects.get(id=id)
+    #     bus_route = BusRouteListSerializer(busroute_obj)
+    #     stops = BusRouteStops.objects.filter(busroute=busroute_obj)
+    #     bus_route_stops_data = []
+    #     for stop in stops:
+    #         bus_route_stop_data = {
+    #             'stopid':stop.id,
+    #             'busowner': stop.busowner.username,
+    #             'busroute': stop.busroute.route.name,
+    #             'stop': stop.stop.place
+    #         }
+    #         bus_route_stops_data.append(bus_route_stop_data)
+    #     data = {
+    #         'bus_route': bus_route.data,
+    #         'bus_route_stops': bus_route_stops_data
+    #     }
+    #     return Response(data)
+    
+    
+    
     def retrieve(self, request, *args, **kwargs):
         id = kwargs.get("pk")
         busroute_obj = BusRoute.objects.get(id=id)
-        bus_route = BusRouteListSerializer(busroute_obj)
+        bus_route_serializer = BusRouteListSerializer(busroute_obj)
         stops = BusRouteStops.objects.filter(busroute=busroute_obj)
         bus_route_stops_data = []
         for stop in stops:
-            bus_route_stop_data = {
-                'stopid':stop.id,
-                'busowner': stop.busowner.username,
-                'busroute': stop.busroute.route.name,
-                'stop': stop.stop.place
-            }
+            bus_route_stop_serializer = BusRouteStopsSerializer(stop)
+            bus_stop_detail = BusStopDetail.objects.filter(busstop=stop).first()
+            if bus_stop_detail:
+                bus_stop_detail_serializer = BusStopDetailSerializer(bus_stop_detail)
+                bus_route_stop_data = {
+                    'stopid': stop.id,
+                    'busowner': stop.busowner.username,
+                    'busroute': stop.busroute.route.name,
+                    'stop': stop.stop.place,
+                    'bus_stop_detail': bus_stop_detail_serializer.data
+                }
+            else:
+                bus_route_stop_data = {
+                    'stopid': stop.id,
+                    'busowner': stop.busowner.username,
+                    'busroute': stop.busroute.route.name,
+                    'stop': stop.stop.place,
+                    'bus_stop_detail': None
+                }
+
             bus_route_stops_data.append(bus_route_stop_data)
         data = {
-            'bus_route': bus_route.data,
+            'bus_route': bus_route_serializer.data,
             'bus_route_stops': bus_route_stops_data
-        }
+        }   
         return Response(data)
     
     
@@ -231,11 +267,28 @@ class BusRouteStopView(ViewSet):
         serializer=BusRouteStopsSerializer(qs,many=True)
         return Response(serializer.data)
     
-    def retrieve(self,request,*args,**kwargs):
-        id=kwargs.get("pk")
-        qs=BusRouteStops.objects.get(id=id)
-        serializer=BusRouteStopsSerializer(qs)
-        return Response(serializer.data)
+    # def retrieve(self,request,*args,**kwargs):
+    #     id=kwargs.get("pk")
+    #     qs=BusRouteStops.objects.get(id=id)
+    #     serializer=BusRouteStopsSerializer(qs)
+    #     return Response(serializer.data)
+    
+    
+    def retrieve(self, request, *args, **kwargs):
+        id = kwargs.get("pk")
+        bus_route_stop = BusRouteStops.objects.get(id=id)
+        bus_route_stop_serializer = BusRouteStopsSerializer(bus_route_stop)
+        bus_stop_detail = BusStopDetail.objects.filter(busstop=bus_route_stop).first()
+
+        if bus_stop_detail:
+            bus_stop_detail_serializer = BusStopDetailSerializer(bus_stop_detail)
+            data = {
+                "bus_route_stop": bus_route_stop_serializer.data,
+                "bus_stop_detail": bus_stop_detail_serializer.data
+            }
+            return Response(data)
+        else:
+            return Response(data={"message": "Bus stop detail not found"}, status=status.HTTP_404_NOT_FOUND)
     
     
     def destroy(self, request, *args, **kwargs):
@@ -246,6 +299,8 @@ class BusRouteStopView(ViewSet):
             return Response("stop removed")
         except Route.DoesNotExist:
             return Response("stop not found", status=status.HTTP_404_NOT_FOUND)
+        
+        
     
     @action(methods=["post"], detail=True)
     def stopdetail(self, request, *args, **kwargs):
@@ -261,13 +316,6 @@ class BusRouteStopView(ViewSet):
            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
        
     
-        
-    @action(methods=["get"], detail=True)
-    def stopdetail(self, request, *args, **kwargs):
-        id=kwargs.get("pk")
-        qs=BusStopDetail.objects.get(id=id)
-        serializer=BusStopDetailSerializer(qs)
-        return Response(serializer.data)
 
     
     

@@ -45,10 +45,41 @@ class RouteView(ViewSet):
     permission_classes=[permissions.IsAuthenticated]
         
         
-    def list(self,request,*args,**kwargs):
-        qs=BusRoute.objects.all()
-        serializer=BusRouteSerializer(qs,many=True)
-        return Response(serializer.data)
+    # def list(self,request,*args,**kwargs):
+    #     qs=BusRoute.objects.all()
+    #     serializer=BusRouteSerializer(qs,many=True)
+    #     return Response(serializer.data)
+    
+    
+    
+    def list(self, request, *args, **kwargs):
+        qs = BusRoute.objects.all()
+        route_data = []
+        for route in qs:
+            route_serializer = BusRouteDetailSerializer(route)
+            bus_route_stops = route.busroutestops_set.all()
+            stop_data = []
+            for bus_route_stop in bus_route_stops:
+                stop_serializer = BusRouteStopsSerializer(bus_route_stop)
+                stop_detail = BusStopDetail.objects.get(busstop=bus_route_stop)
+                stop_detail_serializer = BusStopDetailSerializer(stop_detail)
+                stop_data.append({
+                    'stop': {
+                        **stop_serializer.data,
+                        'stop_detail': {
+                            'time': stop_detail_serializer.data.get('time'),
+                            'amount': stop_detail_serializer.data.get('amount')
+                        }
+                    }
+                })
+            route_data.append({
+                'busroute': route_serializer.data,
+                'bus_route_stops': stop_data
+            })
+        return Response(route_data, status=status.HTTP_200_OK)
+
+    
+    
     
     
     def retrieve(self, request, *args, **kwargs):
