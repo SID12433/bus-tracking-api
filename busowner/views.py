@@ -46,6 +46,21 @@ class profileView(APIView):
         qs=BusOwner.objects.get(id=busowner_id)
         serializer=BusOwnerSerializer(qs)
         return Response(serializer.data)
+    
+    
+    def put(self, request, *args, **kwargs): 
+        busowner_id = request.user.id
+        try:
+            busowner = BusOwner.objects.get(id=busowner_id)
+        except busowner.DoesNotExist:
+            return Response({"error": "busowner does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = BusOwnerSerializer(instance=busowner, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -291,6 +306,7 @@ class BusRouteStopView(ViewSet):
             return Response(data={"message": "Bus stop detail not found"}, status=status.HTTP_404_NOT_FOUND)
     
     
+    
     def destroy(self, request, *args, **kwargs):
         id = kwargs.get("pk")
         try:
@@ -299,6 +315,17 @@ class BusRouteStopView(ViewSet):
             return Response("stop removed")
         except Route.DoesNotExist:
             return Response("stop not found", status=status.HTTP_404_NOT_FOUND)
+        
+        
+    def update(self,request,args,*kwargs): 
+        id=kwargs.get("pk")
+        obj=BusRouteStops.objects.get(id=id)
+        serializer=BusRouteStopsSerializer(data=request.data,instance=obj)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data)
+        else:
+            return Response(data=serializer.errors)
         
         
     

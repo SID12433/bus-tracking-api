@@ -38,19 +38,21 @@ class profileView(APIView):
         serializer=PassengerSerializer(qs)
         return Response(serializer.data)
 
+
+from django.core.exceptions import ObjectDoesNotExist 
        
         
 class RouteView(ViewSet):
     authentication_classes=[authentication.TokenAuthentication]
     permission_classes=[permissions.IsAuthenticated]
         
-        
+        # 
     # def list(self,request,*args,**kwargs):
     #     qs=BusRoute.objects.all()
     #     serializer=BusRouteSerializer(qs,many=True)
     #     return Response(serializer.data)
     
-    
+ 
     
     def list(self, request, *args, **kwargs):
         qs = BusRoute.objects.all()
@@ -61,17 +63,22 @@ class RouteView(ViewSet):
             stop_data = []
             for bus_route_stop in bus_route_stops:
                 stop_serializer = BusRouteStopsSerializer(bus_route_stop)
-                stop_detail = BusStopDetail.objects.get(busstop=bus_route_stop)
-                stop_detail_serializer = BusStopDetailSerializer(stop_detail)
-                stop_data.append({
-                    'stop': {
-                        **stop_serializer.data,
-                        'stop_detail': {
-                            'time': stop_detail_serializer.data.get('time'),
-                            'amount': stop_detail_serializer.data.get('amount')
+                try:
+                    stop_detail = BusStopDetail.objects.get(busstop=bus_route_stop)
+                    stop_detail_serializer = BusStopDetailSerializer(stop_detail)
+                    stop_data.append({
+                        'stop': {
+                            **stop_serializer.data,
+                            'stop_detail': {
+                                'time': stop_detail_serializer.data.get('time'),
+                                'amount': stop_detail_serializer.data.get('amount')
+                            }
                         }
-                    }
-                })
+                    })
+                except ObjectDoesNotExist:
+                    # Handle the case where BusStopDetail does not exist for the given query
+                    # You can choose to log the error, return a specific response, or take other appropriate actions
+                    pass  # Do nothing for now, you may log or handle this case as needed
             route_data.append({
                 'busroute': route_serializer.data,
                 'bus_route_stops': stop_data
