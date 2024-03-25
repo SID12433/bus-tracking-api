@@ -10,7 +10,7 @@ from rest_framework import authentication
 from rest_framework import permissions
 from rest_framework.response import Response
 
-from busowner.serializers import BusOwnerSerializer,BusSerializer,BusCategorySerializer,BusRouteSerializer,RouteSerializer,BusRouteStopsSerializer,BusStopDetailSerializer,StopSerializer,BusRouteListSerializer,StopViewSerializer
+from busowner.serializers import BusOwnerSerializer,BusSerializer,BusCategorySerializer,BusRouteSerializer,RouteSerializer,BusRouteStopsSerializer,BusStopDetailSerializer,StopSerializer,BusRouteListSerializer,StopViewSerializer,BusOwnerProfileSerializer
 from adminapi.models import BusOwner,Route,Bus,BusDriver,BusCategory,BusRoute,BusRouteStops,BusStopDetail,Stop
 
 
@@ -55,7 +55,7 @@ class profileView(APIView):
         except busowner.DoesNotExist:
             return Response({"error": "busowner does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = BusOwnerSerializer(instance=busowner, data=request.data)
+        serializer = BusOwnerProfileSerializer(instance=busowner, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

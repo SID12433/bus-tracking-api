@@ -12,7 +12,20 @@ class BusOwnerSerializer(serializers.ModelSerializer):
    
     def create(self, validated_data):
         return BusOwner.objects.create_user(**validated_data)
+
+
+class BusOwnerProfileSerializer(serializers.ModelSerializer):
+    id=serializers.CharField(read_only=True)
+    password=serializers.CharField(read_only=True)
+    username=serializers.CharField(read_only=True)
+    proof=serializers.CharField(read_only=True)
+    is_approved=serializers.CharField(read_only=True)
     
+    class Meta:
+        model=BusOwner
+        fields=["id","username","password","phone","address","is_approved","proof"]
+
+
     
 class BusSerializer(serializers.ModelSerializer):
     id=serializers.CharField(read_only=True)
